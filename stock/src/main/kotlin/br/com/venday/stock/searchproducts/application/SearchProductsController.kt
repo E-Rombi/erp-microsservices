@@ -15,6 +15,7 @@ class SearchProductsController(
     fun search(@RequestParam productIds: List<String>): ResponseEntity<List<SearchProductResponse>> {
         val response = repository.findAllById(productIds).map { p -> SearchProductResponse(p.id!!, p.description, p.price) }
 
+        println("TA RODANDO AQUI LUCCAO")
         return ResponseEntity.ok(response)
     }
 

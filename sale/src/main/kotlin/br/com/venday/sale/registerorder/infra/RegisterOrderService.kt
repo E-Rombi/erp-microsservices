@@ -2,14 +2,11 @@ package br.com.venday.sale.registerorder.infra
 
 import br.com.venday.sale.registerorder.domain.GenerateBillRequest
 import br.com.venday.sale.registerorder.domain.RegisterOrderRequest
+import br.com.venday.sale.shared.domain.TopicName
 import feign.FeignException
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.kafka.support.SendResult
 import org.springframework.stereotype.Service
-import org.springframework.util.concurrent.ListenableFuture
-import org.springframework.util.concurrent.ListenableFutureCallback
 import org.springframework.web.server.ResponseStatusException
 import javax.validation.Valid
 
@@ -29,11 +26,21 @@ class RegisterOrderService(
             val order = request.toModel(products)
             repository.save(order)
 
-            kafkaTemplate.send(TopicName.NEW_ORDER.name(), order.id!!, GenerateBillRequest(order.id!!, order.createdAt, order.total))
-
             return order.id!!
         } catch (e: FeignException) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST)
         }
+    }
+
+    fun invoiceOrder(id: String) {
+        val possibleOrder = repository.findById(id)
+        if (possibleOrder.isEmpty) throw ResponseStatusException(HttpStatus.NOT_FOUND)
+
+        val order = possibleOrder.get()
+
+        order.invoiceOrder()
+        repository.save(order)
+
+        kafkaTemplate.send(TopicName.NEW_ORDER.name(), order.id!!, GenerateBillRequest(order.id!!, order.createdAt, order.total))
     }
 }

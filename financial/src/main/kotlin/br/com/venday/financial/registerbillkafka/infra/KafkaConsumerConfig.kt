@@ -32,6 +32,23 @@ class KafkaConsumerConfig(
     }
 
     @Bean
+    fun consumerCancelOrderFactory(): MutableMap<String, Any> {
+        val props: MutableMap<String, Any> = HashMap()
+        props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrpServer
+        props[ConsumerConfig.GROUP_ID_CONFIG] = groupId
+        props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        return props
+    }
+
+    @Bean
+    fun transactionConsumerCancelOrderFactory(): ConsumerFactory<String, String>? {
+        val stringDeserializer = StringDeserializer()
+
+        return DefaultKafkaConsumerFactory(consumerFactory(), stringDeserializer, stringDeserializer)
+    }
+
+    @Bean
     fun transactionConsumerFactory(): ConsumerFactory<String, GenerateBillRequest>? {
         val stringDeserializer = StringDeserializer()
         val jsonDeserializer: JsonDeserializer<GenerateBillRequest> = JsonDeserializer(
@@ -45,6 +62,15 @@ class KafkaConsumerConfig(
         val factory: ConcurrentKafkaListenerContainerFactory<String, GenerateBillRequest> =
             ConcurrentKafkaListenerContainerFactory<String, GenerateBillRequest>()
         factory.consumerFactory = transactionConsumerFactory()!!
+
+        return factory
+    }
+
+    @Bean
+    fun kafkaListenerContainerCancelOrderFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
+        val factory: ConcurrentKafkaListenerContainerFactory<String, String> =
+            ConcurrentKafkaListenerContainerFactory<String, String>()
+        factory.consumerFactory = transactionConsumerCancelOrderFactory()!!
 
         return factory
     }

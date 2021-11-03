@@ -1,9 +1,10 @@
 package br.com.venday.sale.registerorder.domain
 
-import br.com.venday.sale.registerorder.domain.OrderItemRequest
+import br.com.venday.sale.shared.domain.Order
+import br.com.venday.sale.shared.domain.OrderItem
+import br.com.venday.sale.shared.domain.Product
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
-import kotlin.math.min
 
 data class RegisterOrderRequest(
     @field:NotNull

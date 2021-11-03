@@ -1,4 +1,4 @@
-package br.com.venday.sale.registerorder.domain
+package br.com.venday.sale.shared.domain
 
 import java.math.BigDecimal
 import javax.validation.constraints.NotBlank
